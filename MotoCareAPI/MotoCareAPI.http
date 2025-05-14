@@ -1,0 +1,6 @@
+@MotoCareAPI_HostAddress = http://localhost:5048
+
+GET {{MotoCareAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
