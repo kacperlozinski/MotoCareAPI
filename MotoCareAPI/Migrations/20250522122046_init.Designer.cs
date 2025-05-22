@@ -12,7 +12,7 @@ using MotoCareAPI.Entities;
 namespace MotoCareAPI.Migrations
 {
     [DbContext(typeof(MotoCareDbContext))]
-    [Migration("20250514140252_init")]
+    [Migration("20250522122046_init")]
     partial class init
     {
         /// <inheritdoc />
@@ -124,6 +124,11 @@ namespace MotoCareAPI.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<string>("Notes")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
                         .HasMaxLength(15)
@@ -132,6 +137,58 @@ namespace MotoCareAPI.Migrations
                     b.HasKey("CustomerId");
 
                     b.ToTable("Customers");
+                });
+
+            modelBuilder.Entity("MotoCareAPI.Entities.Service", b =>
+                {
+                    b.Property<int>("ServiceId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ServiceId"));
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateTime>("LastPriceUpdate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(8,2)");
+
+                    b.Property<int>("ServiceCategoryId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ServiceId");
+
+                    b.HasIndex("ServiceCategoryId");
+
+                    b.ToTable("Services");
+                });
+
+            modelBuilder.Entity("MotoCareAPI.Entities.ServiceCategory", b =>
+                {
+                    b.Property<int>("ServiceCategoryId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ServiceCategoryId"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("ServiceCategoryId");
+
+                    b.ToTable("ServiceCategories");
                 });
 
             modelBuilder.Entity("MotoCareAPI.Entities.Appointment", b =>
@@ -156,6 +213,22 @@ namespace MotoCareAPI.Migrations
                         .HasForeignKey("CustomerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("MotoCareAPI.Entities.Service", b =>
+                {
+                    b.HasOne("MotoCareAPI.Entities.ServiceCategory", "Category")
+                        .WithMany("Services")
+                        .HasForeignKey("ServiceCategoryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Category");
+                });
+
+            modelBuilder.Entity("MotoCareAPI.Entities.ServiceCategory", b =>
+                {
+                    b.Navigation("Services");
                 });
 #pragma warning restore 612, 618
         }

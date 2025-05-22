@@ -20,11 +20,25 @@ namespace MotoCareAPI.Migrations
                     FirstName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     LastName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     PhoneNumber = table.Column<string>(type: "nvarchar(15)", maxLength: 15, nullable: false),
-                    Email = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false)
+                    Email = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
+                    Notes = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Customers", x => x.CustomerId);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ServiceCategories",
+                columns: table => new
+                {
+                    ServiceCategoryId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ServiceCategories", x => x.ServiceCategoryId);
                 });
 
             migrationBuilder.CreateTable(
@@ -48,6 +62,29 @@ namespace MotoCareAPI.Migrations
                         principalTable: "Customers",
                         principalColumn: "CustomerId",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Services",
+                columns: table => new
+                {
+                    ServiceId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    Price = table.Column<decimal>(type: "decimal(8,2)", nullable: false),
+                    LastPriceUpdate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ServiceCategoryId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Services", x => x.ServiceId);
+                    table.ForeignKey(
+                        name: "FK_Services_ServiceCategories_ServiceCategoryId",
+                        column: x => x.ServiceCategoryId,
+                        principalTable: "ServiceCategories",
+                        principalColumn: "ServiceCategoryId",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -94,6 +131,11 @@ namespace MotoCareAPI.Migrations
                 name: "IX_Cars_CustomerId",
                 table: "Cars",
                 column: "CustomerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Services_ServiceCategoryId",
+                table: "Services",
+                column: "ServiceCategoryId");
         }
 
         /// <inheritdoc />
@@ -103,7 +145,13 @@ namespace MotoCareAPI.Migrations
                 name: "Appointments");
 
             migrationBuilder.DropTable(
+                name: "Services");
+
+            migrationBuilder.DropTable(
                 name: "Cars");
+
+            migrationBuilder.DropTable(
+                name: "ServiceCategories");
 
             migrationBuilder.DropTable(
                 name: "Customers");

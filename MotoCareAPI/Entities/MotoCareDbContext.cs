@@ -11,16 +11,19 @@ namespace MotoCareAPI.Entities
         public DbSet<Appointment> Appointments { get; set; }
         public DbSet<Customer> Customers { get; set; }
         public DbSet<Car> Cars { get; set; }
+        public DbSet<Service> Services { get; set; }
+        public DbSet<ServiceCategory> ServiceCategories { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
+            // Car
             modelBuilder.Entity<Car>()
-                .HasKey(c => c.CarId);
+                .HasKey(c => c.Id);
 
             modelBuilder.Entity<Car>()
-                .Property(c => c.Make)
+                .Property(c => c.Brand)
                 .IsRequired()
                 .HasMaxLength(100);
 
@@ -38,8 +41,9 @@ namespace MotoCareAPI.Entities
                 .HasOne<Customer>()
                 .WithMany()
                 .HasForeignKey(c => c.CustomerId)
-                .OnDelete(DeleteBehavior.Cascade); 
+                .OnDelete(DeleteBehavior.Cascade);
 
+            // Appointment
             modelBuilder.Entity<Appointment>()
                 .HasKey(a => a.Id);
 
@@ -65,8 +69,9 @@ namespace MotoCareAPI.Entities
                 .HasForeignKey(a => a.CarId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            // Customer
             modelBuilder.Entity<Customer>()
-                .HasKey(c => c.CustomerId);
+                .HasKey(c => c.Id);
 
             modelBuilder.Entity<Customer>()
                 .Property(c => c.FirstName)
@@ -86,6 +91,48 @@ namespace MotoCareAPI.Entities
             modelBuilder.Entity<Customer>()
                 .Property(c => c.PhoneNumber)
                 .HasMaxLength(15);
+
+            modelBuilder.Entity<Customer>()
+                .Property(c => c.Note)
+                .HasMaxLength(200);
+
+            // Service
+            modelBuilder.Entity<Service>()
+                .HasKey(s => s.Id);
+
+            modelBuilder.Entity<Service>()
+                .Property(s => s.Name)
+                .IsRequired()
+                .HasMaxLength(50);
+
+            modelBuilder.Entity<Service>()
+                .Property(s => s.Description)
+                .IsRequired()
+                .HasMaxLength(200);
+
+            modelBuilder.Entity<Service>()
+                .Property(s => s.Price)
+                .IsRequired()
+                .HasColumnType("decimal(8,2)");
+
+            modelBuilder.Entity<Service>()
+                .Property(s => s.LastPriceUpdate)
+                .IsRequired();
+
+            modelBuilder.Entity<Service>()
+                .HasOne(s => s.Category)
+                .WithMany(c => c.Services)
+                .HasForeignKey(s => s.ServiceCategoryId)
+                .OnDelete(DeleteBehavior.Restrict); // <== kluczowa zmiana
+
+            // ServiceCategory
+            modelBuilder.Entity<ServiceCategory>()
+                .HasKey(c => c.Id);
+
+            modelBuilder.Entity<ServiceCategory>()
+                .Property(c => c.Name)
+                .IsRequired()
+                .HasMaxLength(100);
         }
     }
 }
