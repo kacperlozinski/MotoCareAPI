@@ -12,8 +12,8 @@ using MotoCareAPI.Entities;
 namespace MotoCareAPI.Migrations
 {
     [DbContext(typeof(MotoCareDbContext))]
-    [Migration("20250522122046_init")]
-    partial class init
+    [Migration("20250522130643_init2")]
+    partial class init2
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -67,11 +67,16 @@ namespace MotoCareAPI.Migrations
 
             modelBuilder.Entity("MotoCareAPI.Entities.Car", b =>
                 {
-                    b.Property<int>("CarId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CarId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Brand")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<int>("CustomerId")
                         .HasColumnType("int");
@@ -81,11 +86,6 @@ namespace MotoCareAPI.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<string>("Make")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
                     b.Property<string>("Model")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -94,7 +94,7 @@ namespace MotoCareAPI.Migrations
                     b.Property<int>("Year")
                         .HasColumnType("int");
 
-                    b.HasKey("CarId");
+                    b.HasKey("Id");
 
                     b.HasIndex("CustomerId");
 
@@ -103,11 +103,11 @@ namespace MotoCareAPI.Migrations
 
             modelBuilder.Entity("MotoCareAPI.Entities.Customer", b =>
                 {
-                    b.Property<int>("CustomerId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CustomerId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -124,7 +124,7 @@ namespace MotoCareAPI.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<string>("Notes")
+                    b.Property<string>("Note")
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
@@ -134,18 +134,18 @@ namespace MotoCareAPI.Migrations
                         .HasMaxLength(15)
                         .HasColumnType("nvarchar(15)");
 
-                    b.HasKey("CustomerId");
+                    b.HasKey("Id");
 
                     b.ToTable("Customers");
                 });
 
             modelBuilder.Entity("MotoCareAPI.Entities.Service", b =>
                 {
-                    b.Property<int>("ServiceId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ServiceId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -166,7 +166,7 @@ namespace MotoCareAPI.Migrations
                     b.Property<int>("ServiceCategoryId")
                         .HasColumnType("int");
 
-                    b.HasKey("ServiceId");
+                    b.HasKey("Id");
 
                     b.HasIndex("ServiceCategoryId");
 
@@ -175,18 +175,30 @@ namespace MotoCareAPI.Migrations
 
             modelBuilder.Entity("MotoCareAPI.Entities.ServiceCategory", b =>
                 {
-                    b.Property<int>("ServiceCategoryId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ServiceCategoryId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AvailableDiscount")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.HasKey("ServiceCategoryId");
+                    b.Property<string>("Priority")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
 
                     b.ToTable("ServiceCategories");
                 });
