@@ -11,31 +11,8 @@ namespace MotoCareAPI.Controller
     public class ServiceCategoryController : ControllerBase
     {
         private static readonly List<ServiceCategory> _categories = new();
-        private static int _nextId = 1;
 
-        private static ServiceCategoryDto ToDto(ServiceCategory category)
-        {
-            return new ServiceCategoryDto
-            {
-                Id = category.Id,
-                Name = category.Name,
-                Description = category.Description,
-                Priority = category.Priority,
-                AvailableDiscount = category.AvailableDiscount
-            };
-        }
-
-        private static ServiceCategory ToEntity(ServiceCategoryDto dto)
-        {
-            return new ServiceCategory
-            {
-                Id = dto.Id,
-                Name = dto.Name,
-                Description = dto.Description,
-                Priority = dto.Priority,
-                AvailableDiscount = dto.AvailableDiscount
-            };
-        }
+        
 
         [HttpGet]
         public ActionResult<IEnumerable<ServiceCategoryDto>> GetServiceCategories()
@@ -56,26 +33,24 @@ namespace MotoCareAPI.Controller
         public ActionResult<ServiceCategoryDto> CreateServiceCategory([FromBody] ServiceCategoryDto categoryDto)
         {
             var category = ToEntity(categoryDto);
-            category.Id = _nextId++;
+            category.Id = _categories.Any() ? _categories.Max(s => s.Id) + 1 : 1;
             _categories.Add(category);
             var createdDto = ToDto(category);
-            return CreatedAtAction(nameof(GetServiceCategory), new { id = createdDto.Id }, createdDto);
+            return CreatedAtAction(nameof(GetServiceCategory), new { id = category.Id }, createdDto);
         }
 
         [HttpPut("{id}")]
         public IActionResult UpdateServiceCategory(int id, [FromBody] ServiceCategoryDto categoryDto)
         {
-            if (id != categoryDto.Id)
-                return BadRequest();
-
-            var category = _categories.FirstOrDefault(c => c.Id == id);
-            if (category == null)
+           
+            var index = _categories.FindIndex(a => a.Id == id);
+            if (index == -1)
                 return NotFound();
 
-            category.Name = categoryDto.Name;
-            category.Description = categoryDto.Description;
-            category.Priority = categoryDto.Priority;
-            category.AvailableDiscount = categoryDto.AvailableDiscount;
+            var updated = ToEntity(categoryDto);
+            updated.Id = id;
+
+            _categories[index] = updated;
 
             return NoContent();
         }
@@ -89,6 +64,28 @@ namespace MotoCareAPI.Controller
 
             _categories.Remove(category);
             return NoContent();
+        }
+
+        private static ServiceCategoryDto ToDto(ServiceCategory category)
+        {
+            return new ServiceCategoryDto
+            {
+                Name = category.Name,
+                Description = category.Description,
+                Priority = category.Priority,
+                AvailableDiscount = category.AvailableDiscount
+            };
+        }
+
+        private static ServiceCategory ToEntity(ServiceCategoryDto dto)
+        {
+            return new ServiceCategory
+            {
+                Name = dto.Name,
+                Description = dto.Description,
+                Priority = dto.Priority,
+                AvailableDiscount = dto.AvailableDiscount
+            };
         }
     }
 }

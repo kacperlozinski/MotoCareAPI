@@ -11,35 +11,7 @@ namespace MotoCareAPI.Controller
     public class AppointmentController : ControllerBase
     {
         private static List<Appointment> _appointments = new List<Appointment>();
-        private static int _nextId = 1;
-
-        private static AppointmentDto ToDto(Appointment appointment)
-        {
-            return new AppointmentDto
-            {
-                Id = appointment.Id,
-                Title = appointment.Title,
-                Description = appointment.Description,
-                CreatedDate = appointment.CreatedDate,
-                CustomerId = appointment.CustomerId,
-                CarId = appointment.CarId,
-                Status = appointment.Status
-            };
-        }
-
-        private static Appointment ToEntity(AppointmentDto dto)
-        {
-            return new Appointment
-            {
-                Id = dto.Id,
-                Title = dto.Title,
-                Description = dto.Description,
-                CreatedDate = dto.CreatedDate,
-                CustomerId = dto.CustomerId,
-                CarId = dto.CarId,
-                Status = dto.Status
-            };
-        }
+        
 
         [HttpGet]
         public ActionResult<IEnumerable<AppointmentDto>> GetAppointments()
@@ -62,7 +34,7 @@ namespace MotoCareAPI.Controller
         public ActionResult<AppointmentDto> CreateAppointment([FromBody] AppointmentDto dto)
         {
             var appointment = ToEntity(dto);
-            appointment.Id = _nextId++;
+            appointment.Id = _appointments.Any() ? _appointments.Max(s => s.Id) + 1 : 1;
             _appointments.Add(appointment);
 
             return CreatedAtAction(nameof(GetAppointment), new { id = appointment.Id }, ToDto(appointment));
@@ -71,16 +43,14 @@ namespace MotoCareAPI.Controller
         [HttpPut("{id}")]
         public IActionResult UpdateAppointment(int id, [FromBody] AppointmentDto dto)
         {
-            var appointment = _appointments.FirstOrDefault(a => a.Id == id);
-            if (appointment == null)
+            var index = _appointments.FindIndex(a => a.Id == id);
+            if (index == -1)
                 return NotFound();
 
-            appointment.Title = dto.Title;
-            appointment.Description = dto.Description;
-            appointment.CreatedDate = dto.CreatedDate;
-            appointment.CustomerId = dto.CustomerId;
-            appointment.CarId = dto.CarId;
-            appointment.Status = dto.Status;
+            var updated = ToEntity(dto);
+            updated.Id = id; 
+
+            _appointments[index] = updated;
 
             return NoContent();
         }
@@ -94,6 +64,32 @@ namespace MotoCareAPI.Controller
 
             _appointments.Remove(appointment);
             return NoContent();
+        }
+
+        private static AppointmentDto ToDto(Appointment appointment)
+        {
+            return new AppointmentDto
+            {
+                Title = appointment.Title,
+                Description = appointment.Description,
+                CreatedDate = appointment.CreatedDate,
+                CustomerId = appointment.CustomerId,
+                CarId = appointment.CarId,
+                Status = appointment.Status
+            };
+        }
+
+        private static Appointment ToEntity(AppointmentDto dto)
+        {
+            return new Appointment
+            {
+                Title = dto.Title,
+                Description = dto.Description,
+                CreatedDate = dto.CreatedDate,
+                CustomerId = dto.CustomerId,
+                CarId = dto.CarId,
+                Status = dto.Status
+            };
         }
     }
 }

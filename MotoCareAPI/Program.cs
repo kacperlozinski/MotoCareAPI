@@ -9,9 +9,7 @@ builder.Services.AddControllers();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-/*builder.Services.AddDbContext<MotoCareDbContext>(options =>
-    options.UseSqlServer("Server=localhost;Database=MotoCare;User Id=sa;Password=Kacper123;TrustServerCertificate=True;"));
-*/
+
 var app = builder.Build();
 
 // Middleware

@@ -11,33 +11,7 @@ namespace MotoCareAPI.Controller
     public class CarController : ControllerBase
     {
         private static List<Car> _cars = new List<Car>();
-        private static int _nextId = 1;
-
-        private static CarDto ToDto(Car car)
-        {
-            return new CarDto
-            {
-                Id = car.Id,
-                Brand = car.Brand,
-                Model = car.Model,
-                LicensePlate = car.LicensePlate,
-                Year = car.Year,
-                CustomerId = car.CustomerId
-            };
-        }
-
-        private static Car ToEntity(CarDto dto)
-        {
-            return new Car
-            {
-                Id = dto.Id,
-                Brand = dto.Brand,
-                Model = dto.Model,
-                LicensePlate = dto.LicensePlate,
-                Year = dto.Year,
-                CustomerId = dto.CustomerId
-            };
-        }
+        
 
         [HttpGet]
         public ActionResult<IEnumerable<CarDto>> GetCars()
@@ -60,7 +34,7 @@ namespace MotoCareAPI.Controller
         public ActionResult<CarDto> CreateCar([FromBody] CarDto dto)
         {
             var car = ToEntity(dto);
-            car.Id = _nextId++;
+            car.Id = _cars.Any() ? _cars.Max(s => s.Id) + 1 : 1;
             _cars.Add(car);
 
             return CreatedAtAction(nameof(GetCar), new { id = car.Id }, ToDto(car));
@@ -69,15 +43,14 @@ namespace MotoCareAPI.Controller
         [HttpPut("{id}")]
         public IActionResult UpdateCar(int id, [FromBody] CarDto dto)
         {
-            var car = _cars.FirstOrDefault(c => c.Id == id);
-            if (car == null)
+            var index = _cars.FindIndex(a => a.Id == id);
+            if (index == -1)
                 return NotFound();
 
-            car.Brand = dto.Brand;
-            car.Model = dto.Model;
-            car.LicensePlate = dto.LicensePlate;
-            car.Year = dto.Year;
-            car.CustomerId = dto.CustomerId;
+            var updated = ToEntity(dto);
+            updated.Id = id;
+
+            _cars[index] = updated;
 
             return NoContent();
         }
@@ -91,6 +64,30 @@ namespace MotoCareAPI.Controller
 
             _cars.Remove(car);
             return NoContent();
+        }
+
+        private static CarDto ToDto(Car car)
+        {
+            return new CarDto
+            {
+                Brand = car.Brand,
+                Model = car.Model,
+                LicensePlate = car.LicensePlate,
+                Year = car.Year,
+                CustomerId = car.CustomerId
+            };
+        }
+
+        private static Car ToEntity(CarDto dto)
+        {
+            return new Car
+            {
+                Brand = dto.Brand,
+                Model = dto.Model,
+                LicensePlate = dto.LicensePlate,
+                Year = dto.Year,
+                CustomerId = dto.CustomerId
+            };
         }
     }
 }

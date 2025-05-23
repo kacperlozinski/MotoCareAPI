@@ -11,33 +11,7 @@ namespace MotoCareAPI.Controller
     public class CustomerController : ControllerBase
     {
         private static readonly List<Customer> _customers = new();
-        private static int _nextId = 1;
-
-        private static CustomerDto ToDto(Customer customer)
-        {
-            return new CustomerDto
-            {
-                Id = customer.Id,
-                FirstName = customer.FirstName,
-                LastName = customer.LastName,
-                PhoneNumber = customer.PhoneNumber,
-                Email = customer.Email,
-                Note = customer.Note
-            };
-        }
-
-        private static Customer ToEntity(CustomerDto dto)
-        {
-            return new Customer
-            {
-                Id = dto.Id,
-                FirstName = dto.FirstName,
-                LastName = dto.LastName,
-                PhoneNumber = dto.PhoneNumber,
-                Email = dto.Email,
-                Note = dto.Note
-            };
-        }
+        
 
         [HttpGet]
         public ActionResult<IEnumerable<CustomerDto>> GetCustomers()
@@ -59,7 +33,7 @@ namespace MotoCareAPI.Controller
         {
 
             var customer = ToEntity(customerDto);
-            customer.Id = _nextId++;
+            customer.Id = _customers.Any() ? _customers.Max(s => s.Id) + 1 : 1;
             _customers.Add(customer);
             return CreatedAtAction(nameof(GetCustomer), new { id = customer.Id }, ToDto(customer));
         }
@@ -67,19 +41,15 @@ namespace MotoCareAPI.Controller
         [HttpPut("{id}")]
         public IActionResult UpdateCustomer(int id, [FromBody] CustomerDto customerDto)
         {
-            if (id != customerDto.Id)
-                return BadRequest();
-
-            var customer = _customers.FirstOrDefault(c => c.Id == id);
-            if (customer == null)
+           
+            var index = _customers.FindIndex(a => a.Id == id);
+            if (index == -1)
                 return NotFound();
 
+            var updated = ToEntity(customerDto);
+            updated.Id = id;
 
-            customer.FirstName = customerDto.FirstName;
-            customer.LastName = customerDto.LastName;
-            customer.PhoneNumber = customerDto.PhoneNumber;
-            customer.Email = customerDto.Email;
-            customer.Note = customerDto.Note;
+            _customers[index] = updated;
 
             return NoContent();
         }
@@ -93,6 +63,30 @@ namespace MotoCareAPI.Controller
 
             _customers.Remove(customer);
             return NoContent();
+        }
+
+        private static CustomerDto ToDto(Customer customer)
+        {
+            return new CustomerDto
+            {
+                FirstName = customer.FirstName,
+                LastName = customer.LastName,
+                PhoneNumber = customer.PhoneNumber,
+                Email = customer.Email,
+                Note = customer.Note
+            };
+        }
+
+        private static Customer ToEntity(CustomerDto dto)
+        {
+            return new Customer
+            {
+                FirstName = dto.FirstName,
+                LastName = dto.LastName,
+                PhoneNumber = dto.PhoneNumber,
+                Email = dto.Email,
+                Note = dto.Note
+            };
         }
     }
 }
