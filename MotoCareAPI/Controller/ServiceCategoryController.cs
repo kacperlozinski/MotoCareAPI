@@ -1,7 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using MotoCareAPI.Entities;
 using MotoCareAPI.MotoCareDTO;
-using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace MotoCareAPI.Controller
 {
@@ -9,14 +10,9 @@ namespace MotoCareAPI.Controller
     [Route("api/[controller]")]
     public class ServiceCategoryController : ControllerBase
     {
-        private readonly MotoCareDbContext _context;
+        private static readonly List<ServiceCategory> _categories = new();
+        private static int _nextId = 1;
 
-        public ServiceCategoryController(MotoCareDbContext context)
-        {
-            _context = context;
-        }
-
-        
         private static ServiceCategoryDto ToDto(ServiceCategory category)
         {
             return new ServiceCategoryDto
@@ -26,11 +22,9 @@ namespace MotoCareAPI.Controller
                 Description = category.Description,
                 Priority = category.Priority,
                 AvailableDiscount = category.AvailableDiscount
-                // Add mapping for Services if needed in DTO
             };
         }
 
-        
         private static ServiceCategory ToEntity(ServiceCategoryDto dto)
         {
             return new ServiceCategory
@@ -40,43 +34,41 @@ namespace MotoCareAPI.Controller
                 Description = dto.Description,
                 Priority = dto.Priority,
                 AvailableDiscount = dto.AvailableDiscount
-                // Add mapping for Services if needed in DTO
             };
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ServiceCategoryDto>>> GetServiceCategories()
+        public ActionResult<IEnumerable<ServiceCategoryDto>> GetServiceCategories()
         {
-            var categories = await _context.ServiceCategories.ToListAsync();
-            return Ok(categories.Select(ToDto));
+            return Ok(_categories.Select(ToDto));
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<ServiceCategoryDto>> GetServiceCategory(int id)
+        public ActionResult<ServiceCategoryDto> GetServiceCategory(int id)
         {
-            var category = await _context.ServiceCategories.FirstOrDefaultAsync(c => c.Id == id);
+            var category = _categories.FirstOrDefault(c => c.Id == id);
             if (category == null)
                 return NotFound();
             return Ok(ToDto(category));
         }
 
         [HttpPost]
-        public async Task<ActionResult<ServiceCategoryDto>> CreateServiceCategory(ServiceCategoryDto categoryDto)
+        public ActionResult<ServiceCategoryDto> CreateServiceCategory([FromBody] ServiceCategoryDto categoryDto)
         {
             var category = ToEntity(categoryDto);
-            _context.ServiceCategories.Add(category);
-            await _context.SaveChangesAsync();
+            category.Id = _nextId++;
+            _categories.Add(category);
             var createdDto = ToDto(category);
             return CreatedAtAction(nameof(GetServiceCategory), new { id = createdDto.Id }, createdDto);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateServiceCategory(int id, ServiceCategoryDto categoryDto)
+        public IActionResult UpdateServiceCategory(int id, [FromBody] ServiceCategoryDto categoryDto)
         {
             if (id != categoryDto.Id)
                 return BadRequest();
 
-            var category = await _context.ServiceCategories.FindAsync(id);
+            var category = _categories.FirstOrDefault(c => c.Id == id);
             if (category == null)
                 return NotFound();
 
@@ -85,19 +77,17 @@ namespace MotoCareAPI.Controller
             category.Priority = categoryDto.Priority;
             category.AvailableDiscount = categoryDto.AvailableDiscount;
 
-            await _context.SaveChangesAsync();
             return NoContent();
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteServiceCategory(int id)
+        public IActionResult DeleteServiceCategory(int id)
         {
-            var category = await _context.ServiceCategories.FindAsync(id);
+            var category = _categories.FirstOrDefault(c => c.Id == id);
             if (category == null)
                 return NotFound();
 
-            _context.ServiceCategories.Remove(category);
-            await _context.SaveChangesAsync();
+            _categories.Remove(category);
             return NoContent();
         }
     }

@@ -10,18 +10,14 @@ namespace MotoCareAPI.Controller
     [Route("api/[controller]")]
     public class AppointmentController : ControllerBase
     {
-        private readonly MotoCareDbContext _context;
-
-        public AppointmentController(MotoCareDbContext context)
-        {
-            _context = context;
-        }
+        private static List<Appointment> _appointments = new List<Appointment>();
+        private static int _nextId = 1;
 
         private static AppointmentDto ToDto(Appointment appointment)
         {
             return new AppointmentDto
             {
-               // Id = appointment.Id,
+                Id = appointment.Id,
                 Title = appointment.Title,
                 Description = appointment.Description,
                 CreatedDate = appointment.CreatedDate,
@@ -35,7 +31,7 @@ namespace MotoCareAPI.Controller
         {
             return new Appointment
             {
-              //  Id = dto.Id,
+                Id = dto.Id,
                 Title = dto.Title,
                 Description = dto.Description,
                 CreatedDate = dto.CreatedDate,
@@ -48,60 +44,43 @@ namespace MotoCareAPI.Controller
         [HttpGet]
         public ActionResult<IEnumerable<AppointmentDto>> GetAppointments()
         {
-            var appointments = _context.Appointments.ToList();
-            var dtos = appointments.Select(ToDto).ToList();
+            var dtos = _appointments.Select(ToDto).ToList();
             return Ok(dtos);
         }
 
         [HttpGet("{id}")]
         public ActionResult<AppointmentDto> GetAppointment(int id)
         {
-            var appointment = _context.Appointments.Find(id);
+            var appointment = _appointments.FirstOrDefault(a => a.Id == id);
             if (appointment == null)
-            {
                 return NotFound();
-            }
+
             return Ok(ToDto(appointment));
         }
 
         [HttpPost]
-        public ActionResult<AppointmentDto> CreateAppointment([FromBody] AppointmentDto appointmentDto)
+        public ActionResult<AppointmentDto> CreateAppointment([FromBody] AppointmentDto dto)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+            var appointment = ToEntity(dto);
+            appointment.Id = _nextId++;
+            _appointments.Add(appointment);
 
-            var appointment = ToEntity(appointmentDto);
-            _context.Appointments.Add(appointment);
-            _context.SaveChanges();
-
-            var createdDto = ToDto(appointment);
-            return CreatedAtAction(nameof(GetAppointment), new { id = createdDto.Id }, createdDto);
+            return CreatedAtAction(nameof(GetAppointment), new { id = appointment.Id }, ToDto(appointment));
         }
 
         [HttpPut("{id}")]
-        public IActionResult UpdateAppointment(int id, [FromBody] AppointmentDto updatedDto)
+        public IActionResult UpdateAppointment(int id, [FromBody] AppointmentDto dto)
         {
-            if (id != updatedDto.Id)
-            {
-                return BadRequest("Appointment ID mismatch.");
-            }
-
-            var appointment = _context.Appointments.Find(id);
+            var appointment = _appointments.FirstOrDefault(a => a.Id == id);
             if (appointment == null)
-            {
                 return NotFound();
-            }
 
-            appointment.Title = updatedDto.Title;
-            appointment.Description = updatedDto.Description;
-            appointment.CreatedDate = updatedDto.CreatedDate;
-            appointment.CustomerId = updatedDto.CustomerId;
-            appointment.CarId = updatedDto.CarId;
-            appointment.Status = updatedDto.Status;
-
-            _context.SaveChanges();
+            appointment.Title = dto.Title;
+            appointment.Description = dto.Description;
+            appointment.CreatedDate = dto.CreatedDate;
+            appointment.CustomerId = dto.CustomerId;
+            appointment.CarId = dto.CarId;
+            appointment.Status = dto.Status;
 
             return NoContent();
         }
@@ -109,15 +88,11 @@ namespace MotoCareAPI.Controller
         [HttpDelete("{id}")]
         public IActionResult DeleteAppointment(int id)
         {
-            var appointment = _context.Appointments.Find(id);
+            var appointment = _appointments.FirstOrDefault(a => a.Id == id);
             if (appointment == null)
-            {
                 return NotFound();
-            }
 
-            _context.Appointments.Remove(appointment);
-            _context.SaveChanges();
-
+            _appointments.Remove(appointment);
             return NoContent();
         }
     }

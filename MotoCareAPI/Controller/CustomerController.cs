@@ -1,10 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
-using MotoCareAPI.Entities;
 using MotoCareAPI.MotoCareDTO;
-using Microsoft.EntityFrameworkCore;
+using MotoCareAPI.Entities;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace MotoCareAPI.Controller
 {
@@ -12,12 +10,8 @@ namespace MotoCareAPI.Controller
     [Route("api/[controller]")]
     public class CustomerController : ControllerBase
     {
-        private readonly MotoCareDbContext _context;
-
-        public CustomerController(MotoCareDbContext context)
-        {
-            _context = context;
-        }
+        private static readonly List<Customer> _customers = new();
+        private static int _nextId = 1;
 
         private static CustomerDto ToDto(Customer customer)
         {
@@ -46,41 +40,40 @@ namespace MotoCareAPI.Controller
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<CustomerDto>>> GetCustomers()
+        public ActionResult<IEnumerable<CustomerDto>> GetCustomers()
         {
-            var customers = await _context.Customers.ToListAsync();
-            return Ok(customers.Select(ToDto));
+            return Ok(_customers.Select(ToDto));
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<CustomerDto>> GetCustomer(int id)
+        public ActionResult<CustomerDto> GetCustomer(int id)
         {
-            var customer = await _context.Customers.FindAsync(id);
+            var customer = _customers.FirstOrDefault(c => c.Id == id);
             if (customer == null)
                 return NotFound();
             return Ok(ToDto(customer));
         }
 
         [HttpPost]
-        public async Task<ActionResult<CustomerDto>> CreateCustomer([FromBody] CustomerDto customerDto)
+        public ActionResult<CustomerDto> CreateCustomer([FromBody] CustomerDto customerDto)
         {
+
             var customer = ToEntity(customerDto);
-            _context.Customers.Add(customer);
-            await _context.SaveChangesAsync();
-            var createdDto = ToDto(customer);
-            return CreatedAtAction(nameof(GetCustomer), new { id = createdDto.Id }, createdDto);
-            //add checking email for avoiding multiply users
+            customer.Id = _nextId++;
+            _customers.Add(customer);
+            return CreatedAtAction(nameof(GetCustomer), new { id = customer.Id }, ToDto(customer));
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateCustomer(int id, [FromBody] CustomerDto customerDto)
+        public IActionResult UpdateCustomer(int id, [FromBody] CustomerDto customerDto)
         {
             if (id != customerDto.Id)
                 return BadRequest();
 
-            var customer = await _context.Customers.FindAsync(id);
+            var customer = _customers.FirstOrDefault(c => c.Id == id);
             if (customer == null)
                 return NotFound();
+
 
             customer.FirstName = customerDto.FirstName;
             customer.LastName = customerDto.LastName;
@@ -88,19 +81,17 @@ namespace MotoCareAPI.Controller
             customer.Email = customerDto.Email;
             customer.Note = customerDto.Note;
 
-            await _context.SaveChangesAsync();
             return NoContent();
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteCustomer(int id)
+        public IActionResult DeleteCustomer(int id)
         {
-            var customer = await _context.Customers.FindAsync(id);
+            var customer = _customers.FirstOrDefault(c => c.Id == id);
             if (customer == null)
                 return NotFound();
 
-            _context.Customers.Remove(customer);
-            await _context.SaveChangesAsync();
+            _customers.Remove(customer);
             return NoContent();
         }
     }

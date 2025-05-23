@@ -1,7 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using MotoCareAPI.Entities;
 using MotoCareAPI.MotoCareDTO;
-using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace MotoCareAPI.Controller
 {
@@ -9,14 +10,9 @@ namespace MotoCareAPI.Controller
     [Route("api/[controller]")]
     public class ServiceController : ControllerBase
     {
-        private readonly MotoCareDbContext _context;
+        private static readonly List<Service> _services = new();
+        private static int _nextId = 1;
 
-        public ServiceController(MotoCareDbContext context)
-        {
-            _context = context;
-        }
-
-        
         private static ServiceDto ToDto(Service service)
         {
             return new ServiceDto
@@ -27,11 +23,9 @@ namespace MotoCareAPI.Controller
                 Price = service.Price,
                 LastPriceUpdate = service.LastPriceUpdate,
                 ServiceCategoryId = service.ServiceCategoryId
-                
             };
         }
 
-        
         private static Service ToEntity(ServiceDto dto)
         {
             return new Service
@@ -46,38 +40,37 @@ namespace MotoCareAPI.Controller
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ServiceDto>>> GetServices()
+        public ActionResult<IEnumerable<ServiceDto>> GetServices()
         {
-            var services = await _context.Services.Include(s => s.Category).ToListAsync();
-            return Ok(services.Select(ToDto));
+            return Ok(_services.Select(ToDto));
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<ServiceDto>> GetService(int id)
+        public ActionResult<ServiceDto> GetService(int id)
         {
-            var service = await _context.Services.Include(s => s.Category).FirstOrDefaultAsync(s => s.Id == id);
+            var service = _services.FirstOrDefault(s => s.Id == id);
             if (service == null)
                 return NotFound();
             return Ok(ToDto(service));
         }
 
         [HttpPost]
-        public async Task<ActionResult<ServiceDto>> CreateService(ServiceDto serviceDto)
+        public ActionResult<ServiceDto> CreateService([FromBody] ServiceDto serviceDto)
         {
             var service = ToEntity(serviceDto);
-            _context.Services.Add(service);
-            await _context.SaveChangesAsync();
+            service.Id = _nextId++;
+            _services.Add(service);
             var createdDto = ToDto(service);
             return CreatedAtAction(nameof(GetService), new { id = createdDto.Id }, createdDto);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateService(int id, ServiceDto serviceDto)
+        public IActionResult UpdateService(int id, [FromBody] ServiceDto serviceDto)
         {
             if (id != serviceDto.Id)
                 return BadRequest();
 
-            var service = await _context.Services.FindAsync(id);
+            var service = _services.FirstOrDefault(s => s.Id == id);
             if (service == null)
                 return NotFound();
 
@@ -87,19 +80,17 @@ namespace MotoCareAPI.Controller
             service.LastPriceUpdate = serviceDto.LastPriceUpdate;
             service.ServiceCategoryId = serviceDto.ServiceCategoryId;
 
-            await _context.SaveChangesAsync();
             return NoContent();
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteService(int id)
+        public IActionResult DeleteService(int id)
         {
-            var service = await _context.Services.FindAsync(id);
+            var service = _services.FirstOrDefault(s => s.Id == id);
             if (service == null)
                 return NotFound();
 
-            _context.Services.Remove(service);
-            await _context.SaveChangesAsync();
+            _services.Remove(service);
             return NoContent();
         }
     }

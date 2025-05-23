@@ -1,10 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using MotoCareAPI.Entities;
 using MotoCareAPI.MotoCareDTO;
-using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace MotoCareAPI.Controller
 {
@@ -12,14 +10,9 @@ namespace MotoCareAPI.Controller
     [Route("api/[controller]")]
     public class CarController : ControllerBase
     {
-        private readonly MotoCareDbContext _context;
+        private static List<Car> _cars = new List<Car>();
+        private static int _nextId = 1;
 
-        public CarController(MotoCareDbContext context)
-        {
-            _context = context;
-        }
-
-       
         private static CarDto ToDto(Car car)
         {
             return new CarDto
@@ -33,7 +26,6 @@ namespace MotoCareAPI.Controller
             };
         }
 
-        
         private static Car ToEntity(CarDto dto)
         {
             return new Car
@@ -48,60 +40,56 @@ namespace MotoCareAPI.Controller
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<CarDto>>> GetCars()
+        public ActionResult<IEnumerable<CarDto>> GetCars()
         {
-            var cars = await _context.Cars.ToListAsync();
-            return Ok(cars.Select(ToDto));
+            var dtos = _cars.Select(ToDto).ToList();
+            return Ok(dtos);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<CarDto>> GetCar(int id)
+        public ActionResult<CarDto> GetCar(int id)
         {
-            var car = await _context.Cars.FindAsync(id);
+            var car = _cars.FirstOrDefault(c => c.Id == id);
             if (car == null)
                 return NotFound();
+
             return Ok(ToDto(car));
         }
 
         [HttpPost]
-        public async Task<ActionResult<CarDto>> CreateCar([FromBody] CarDto carDto)
+        public ActionResult<CarDto> CreateCar([FromBody] CarDto dto)
         {
-            var car = ToEntity(carDto);
-            _context.Cars.Add(car);
-            await _context.SaveChangesAsync();
-            var createdDto = ToDto(car);
-            return CreatedAtAction(nameof(GetCar), new { id = createdDto.Id }, createdDto);
+            var car = ToEntity(dto);
+            car.Id = _nextId++;
+            _cars.Add(car);
+
+            return CreatedAtAction(nameof(GetCar), new { id = car.Id }, ToDto(car));
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateCar(int id, [FromBody] CarDto carDto)
+        public IActionResult UpdateCar(int id, [FromBody] CarDto dto)
         {
-            if (id != carDto.Id)
-                return BadRequest();
-
-            var car = await _context.Cars.FindAsync(id);
+            var car = _cars.FirstOrDefault(c => c.Id == id);
             if (car == null)
                 return NotFound();
 
-            car.Brand = carDto.Brand;
-            car.Model = carDto.Model;
-            car.LicensePlate = carDto.LicensePlate;
-            car.Year = carDto.Year;
-            car.CustomerId = carDto.CustomerId;
+            car.Brand = dto.Brand;
+            car.Model = dto.Model;
+            car.LicensePlate = dto.LicensePlate;
+            car.Year = dto.Year;
+            car.CustomerId = dto.CustomerId;
 
-            await _context.SaveChangesAsync();
             return NoContent();
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteCar(int id)
+        public IActionResult DeleteCar(int id)
         {
-            var car = await _context.Cars.FindAsync(id);
+            var car = _cars.FirstOrDefault(c => c.Id == id);
             if (car == null)
                 return NotFound();
 
-            _context.Cars.Remove(car);
-            await _context.SaveChangesAsync();
+            _cars.Remove(car);
             return NoContent();
         }
     }
