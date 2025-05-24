@@ -12,9 +12,6 @@ namespace MotoCareAPI.Controller
     {
         private static readonly List<Service> _services = new();
 
-
-       
-
         [HttpGet]
         public ActionResult<IEnumerable<ServiceDto>> GetServices()
         {
@@ -25,8 +22,10 @@ namespace MotoCareAPI.Controller
         public ActionResult<ServiceDto> GetService(int id)
         {
             var service = _services.FirstOrDefault(s => s.Id == id);
+
             if (service == null)
                 return NotFound();
+
             return Ok(ToDto(service));
         }
 
@@ -44,6 +43,7 @@ namespace MotoCareAPI.Controller
         public IActionResult UpdateService(int id, [FromBody] ServiceDto serviceDto)
         {
             var index = _services.FindIndex(a => a.Id == id);
+
             if (index == -1)
                 return NotFound();
 
@@ -59,6 +59,7 @@ namespace MotoCareAPI.Controller
         public IActionResult DeleteService(int id)
         {
             var service = _services.FirstOrDefault(s => s.Id == id);
+
             if (service == null)
                 return NotFound();
 

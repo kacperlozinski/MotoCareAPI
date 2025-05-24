@@ -12,8 +12,6 @@ namespace MotoCareAPI.Controller
     {
         private static readonly List<ServiceCategory> _categories = new();
 
-        
-
         [HttpGet]
         public ActionResult<IEnumerable<ServiceCategoryDto>> GetServiceCategories()
         {
@@ -24,8 +22,10 @@ namespace MotoCareAPI.Controller
         public ActionResult<ServiceCategoryDto> GetServiceCategory(int id)
         {
             var category = _categories.FirstOrDefault(c => c.Id == id);
+
             if (category == null)
                 return NotFound();
+
             return Ok(ToDto(category));
         }
 
@@ -44,6 +44,7 @@ namespace MotoCareAPI.Controller
         {
            
             var index = _categories.FindIndex(a => a.Id == id);
+
             if (index == -1)
                 return NotFound();
 
@@ -59,6 +60,7 @@ namespace MotoCareAPI.Controller
         public IActionResult DeleteServiceCategory(int id)
         {
             var category = _categories.FirstOrDefault(c => c.Id == id);
+
             if (category == null)
                 return NotFound();
 

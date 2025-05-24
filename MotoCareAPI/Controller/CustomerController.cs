@@ -12,7 +12,6 @@ namespace MotoCareAPI.Controller
     {
         private static readonly List<Customer> _customers = new();
         
-
         [HttpGet]
         public ActionResult<IEnumerable<CustomerDto>> GetCustomers()
         {
@@ -23,15 +22,16 @@ namespace MotoCareAPI.Controller
         public ActionResult<CustomerDto> GetCustomer(int id)
         {
             var customer = _customers.FirstOrDefault(c => c.Id == id);
+
             if (customer == null)
                 return NotFound();
+
             return Ok(ToDto(customer));
         }
 
         [HttpPost]
         public ActionResult<CustomerDto> CreateCustomer([FromBody] CustomerDto customerDto)
         {
-
             var customer = ToEntity(customerDto);
             customer.Id = _customers.Any() ? _customers.Max(s => s.Id) + 1 : 1;
             _customers.Add(customer);
@@ -41,8 +41,8 @@ namespace MotoCareAPI.Controller
         [HttpPut("{id}")]
         public IActionResult UpdateCustomer(int id, [FromBody] CustomerDto customerDto)
         {
-           
             var index = _customers.FindIndex(a => a.Id == id);
+
             if (index == -1)
                 return NotFound();
 
@@ -58,6 +58,7 @@ namespace MotoCareAPI.Controller
         public IActionResult DeleteCustomer(int id)
         {
             var customer = _customers.FirstOrDefault(c => c.Id == id);
+
             if (customer == null)
                 return NotFound();
 

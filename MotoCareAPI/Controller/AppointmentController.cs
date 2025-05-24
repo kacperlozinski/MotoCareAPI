@@ -12,11 +12,11 @@ namespace MotoCareAPI.Controller
     {
         private static List<Appointment> _appointments = new List<Appointment>();
         
-
         [HttpGet]
         public ActionResult<IEnumerable<AppointmentDto>> GetAppointments()
         {
             var dtos = _appointments.Select(ToDto).ToList();
+
             return Ok(dtos);
         }
 
@@ -24,6 +24,7 @@ namespace MotoCareAPI.Controller
         public ActionResult<AppointmentDto> GetAppointment(int id)
         {
             var appointment = _appointments.FirstOrDefault(a => a.Id == id);
+
             if (appointment == null)
                 return NotFound();
 
@@ -43,14 +44,18 @@ namespace MotoCareAPI.Controller
         [HttpPut("{id}")]
         public IActionResult UpdateAppointment(int id, [FromBody] AppointmentDto dto)
         {
-            var index = _appointments.FindIndex(a => a.Id == id);
-            if (index == -1)
+            var index = _appointments.FirstOrDefault(a => a.Id == id);
+
+            if (index is null)
                 return NotFound();
 
             var updated = ToEntity(dto);
-            updated.Id = id; 
+            updated.Id = id;
 
-            _appointments[index] = updated;
+            var i = _appointments.FindIndex(a => a.Id == id);
+
+            if (i >= 0)
+                _appointments[i] = updated;
 
             return NoContent();
         }
@@ -59,10 +64,12 @@ namespace MotoCareAPI.Controller
         public IActionResult DeleteAppointment(int id)
         {
             var appointment = _appointments.FirstOrDefault(a => a.Id == id);
+
             if (appointment == null)
                 return NotFound();
 
             _appointments.Remove(appointment);
+
             return NoContent();
         }
 

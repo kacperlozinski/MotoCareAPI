@@ -12,7 +12,6 @@ namespace MotoCareAPI.Controller
     {
         private static List<Car> _cars = new List<Car>();
         
-
         [HttpGet]
         public ActionResult<IEnumerable<CarDto>> GetCars()
         {
@@ -24,6 +23,7 @@ namespace MotoCareAPI.Controller
         public ActionResult<CarDto> GetCar(int id)
         {
             var car = _cars.FirstOrDefault(c => c.Id == id);
+
             if (car == null)
                 return NotFound();
 
@@ -44,6 +44,7 @@ namespace MotoCareAPI.Controller
         public IActionResult UpdateCar(int id, [FromBody] CarDto dto)
         {
             var index = _cars.FindIndex(a => a.Id == id);
+
             if (index == -1)
                 return NotFound();
 
@@ -59,6 +60,7 @@ namespace MotoCareAPI.Controller
         public IActionResult DeleteCar(int id)
         {
             var car = _cars.FirstOrDefault(c => c.Id == id);
+
             if (car == null)
                 return NotFound();
 
