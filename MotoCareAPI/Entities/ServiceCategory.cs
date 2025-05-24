@@ -1,12 +1,14 @@
-﻿namespace MotoCareAPI.Entities
+﻿using MotoCareAPI.Enums;
+
+namespace MotoCareAPI.Entities
 {
     public class ServiceCategory
     {        
             public int Id { get; set; }
-            public string Name { get; set; } //basic, standard, premium
+            public CategoryName categoryName { get; set; }
             public string Description { get; set; } 
-            public string Priority { get; set; } //low, medium, high
-            public string AvailableDiscount { get; set; } // yes/no
+            public PriorityLevel PriorityLevel { get; set; } 
+            public DiscountAvailability  DiscountAvailability{ get; set; } 
         public ICollection<Service> Services { get; set; }  
 
     }

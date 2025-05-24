@@ -70,10 +70,10 @@ namespace MotoCareAPI.Controller
         {
             return new ServiceCategoryDto
             {
-                Name = category.Name,
+                categoryName = category.categoryName,
                 Description = category.Description,
-                Priority = category.Priority,
-                AvailableDiscount = category.AvailableDiscount
+                PriorityLevel = category.PriorityLevel,
+                DiscountAvailability = category.DiscountAvailability
             };
         }
 
@@ -81,10 +81,10 @@ namespace MotoCareAPI.Controller
         {
             return new ServiceCategory
             {
-                Name = dto.Name,
+                categoryName = dto.categoryName,
                 Description = dto.Description,
-                Priority = dto.Priority,
-                AvailableDiscount = dto.AvailableDiscount
+                PriorityLevel = dto.PriorityLevel,
+                DiscountAvailability = dto.DiscountAvailability
             };
         }
     }
