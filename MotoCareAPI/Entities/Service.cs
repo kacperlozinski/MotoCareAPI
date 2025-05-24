@@ -9,6 +9,7 @@
         public DateTime LastPriceUpdate { get; set; }
         public int ServiceCategoryId { get; set; }
         public ServiceCategory Category { get; set; }
+        public ICollection<Service> Services { get; set; }
 
     }
 }
