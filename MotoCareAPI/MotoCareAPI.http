@@ -1,6 +1,6 @@
 @MotoCareAPI_HostAddress = http://localhost:5048
 
-GET {{MotoCareAPI_HostAddress}}/weatherforecast/
+GET {{MotoCareAPI_HostAddress}}/api/Appointment/
 Accept: application/json
 
 ###
