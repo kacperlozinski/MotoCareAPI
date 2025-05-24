@@ -11,13 +11,22 @@ namespace MotoCareAPI.Controller
     public class CustomerController : ControllerBase
     {
         private static readonly List<Customer> _customers = new();
-        
+
+        /// <summary>
+        /// Retrieves all customers.
+        /// </summary>
+        /// <returns>List of all customers.</returns>
         [HttpGet]
         public ActionResult<IEnumerable<CustomerDto>> GetCustomers()
         {
             return Ok(_customers.Select(ToDto));
         }
 
+        /// <summary>
+        /// Retrieves a specific customer by ID.
+        /// </summary>
+        /// <param name="id">The ID of the customer.</param>
+        /// <returns>Customer data if found; otherwise NotFound.</returns>
         [HttpGet("{id}")]
         public ActionResult<CustomerDto> GetCustomer(int id)
         {
@@ -29,6 +38,11 @@ namespace MotoCareAPI.Controller
             return Ok(ToDto(customer));
         }
 
+        /// <summary>
+        /// Creates a new customer.
+        /// </summary>
+        /// <param name="customerDto">The customer data to create.</param>
+        /// <returns>The newly created customer with its ID.</returns>
         [HttpPost]
         public ActionResult<CustomerDto> CreateCustomer([FromBody] CustomerDto customerDto)
         {
@@ -38,6 +52,12 @@ namespace MotoCareAPI.Controller
             return CreatedAtAction(nameof(GetCustomer), new { id = customer.Id }, ToDto(customer));
         }
 
+        /// <summary>
+        /// Updates an existing customer.
+        /// </summary>
+        /// <param name="id">The ID of the customer to update.</param>
+        /// <param name="customerDto">The updated customer data.</param>
+        /// <returns>NoContent if updated successfully; NotFound if the customer does not exist.</returns>
         [HttpPut("{id}")]
         public IActionResult UpdateCustomer(int id, [FromBody] CustomerDto customerDto)
         {
@@ -54,6 +74,11 @@ namespace MotoCareAPI.Controller
             return NoContent();
         }
 
+        /// <summary>
+        /// Deletes a customer by ID.
+        /// </summary>
+        /// <param name="id">The ID of the customer to delete.</param>
+        /// <returns>NoContent if deleted; NotFound if the customer does not exist.</returns>
         [HttpDelete("{id}")]
         public IActionResult DeleteCustomer(int id)
         {
