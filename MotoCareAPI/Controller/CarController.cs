@@ -11,7 +11,11 @@ namespace MotoCareAPI.Controller
     public class CarController : ControllerBase
     {
         private static List<Car> _cars = new List<Car>();
-        
+
+        /// <summary>
+        /// Retrieves all cars.
+        /// </summary>
+        /// <returns>List of all cars.</returns>
         [HttpGet]
         public ActionResult<IEnumerable<CarDto>> GetCars()
         {
@@ -19,6 +23,11 @@ namespace MotoCareAPI.Controller
             return Ok(dtos);
         }
 
+        /// <summary>
+        /// Retrieves a car by its ID.
+        /// </summary>
+        /// <param name="id">The ID of the car.</param>
+        /// <returns>The car with the given ID or NotFound.</returns>
         [HttpGet("{id}")]
         public ActionResult<CarDto> GetCar(int id)
         {
@@ -30,6 +39,11 @@ namespace MotoCareAPI.Controller
             return Ok(ToDto(car));
         }
 
+        /// <summary>
+        /// Creates a new car.
+        /// </summary>
+        /// <param name="dto">The data of the car to create.</param>
+        /// <returns>The created car with its ID.</returns>
         [HttpPost]
         public ActionResult<CarDto> CreateCar([FromBody] CarDto dto)
         {
@@ -40,6 +54,12 @@ namespace MotoCareAPI.Controller
             return CreatedAtAction(nameof(GetCar), new { id = car.Id }, ToDto(car));
         }
 
+        /// <summary>
+        /// Updates an existing car.
+        /// </summary>
+        /// <param name="id">The ID of the car to update.</param>
+        /// <param name="dto">The new data for the car.</param>
+        /// <returns>No content on success or NotFound.</returns>
         [HttpPut("{id}")]
         public IActionResult UpdateCar(int id, [FromBody] CarDto dto)
         {
@@ -56,6 +76,11 @@ namespace MotoCareAPI.Controller
             return NoContent();
         }
 
+        /// <summary>
+        /// Deletes a car by its ID.
+        /// </summary>
+        /// <param name="id">The ID of the car to delete.</param>
+        /// <returns>No content on success or NotFound.</returns>
         [HttpDelete("{id}")]
         public IActionResult DeleteCar(int id)
         {

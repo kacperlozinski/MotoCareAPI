@@ -9,6 +9,11 @@ namespace MotoCareAPI.Entities
         public DateTime CreatedDate { get; set; }
         public int CustomerId { get; set; }
         public int CarId { get; set; }
+        public int ServiceId { get; set; }
         public AppointmentStatus Status { get; set; }
+        public ICollection<Service> Services { get; set; }
+        public Customer Customer { get; set; }
+        public Car Car { get; set; }
+
     }
 }

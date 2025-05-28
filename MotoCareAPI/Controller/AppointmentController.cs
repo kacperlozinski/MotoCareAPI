@@ -11,7 +11,11 @@ namespace MotoCareAPI.Controller
     public class AppointmentController : ControllerBase
     {
         private static List<Appointment> _appointments = new List<Appointment>();
-        
+
+        /// <summary>
+        /// Retrieves all appointments.
+        /// </summary>
+        /// <returns>List of appointments.</returns>
         [HttpGet]
         public ActionResult<IEnumerable<AppointmentDto>> GetAppointments()
         {
@@ -20,6 +24,11 @@ namespace MotoCareAPI.Controller
             return Ok(dtos);
         }
 
+        /// <summary>
+        /// Retrieves a specific appointment by ID.
+        /// </summary>
+        /// <param name="id">The appointment ID.</param>
+        /// <returns>An appointment DTO if found; otherwise NotFound.</returns>
         [HttpGet("{id}")]
         public ActionResult<AppointmentDto> GetAppointment(int id)
         {
@@ -31,6 +40,11 @@ namespace MotoCareAPI.Controller
             return Ok(ToDto(appointment));
         }
 
+        /// <summary>
+        /// Creates a new appointment.
+        /// </summary>
+        /// <param name="dto">Appointment data.</param>
+        /// <returns>Newly created appointment with route info.</returns>
         [HttpPost]
         public ActionResult<AppointmentDto> CreateAppointment([FromBody] AppointmentDto dto)
         {
@@ -41,6 +55,12 @@ namespace MotoCareAPI.Controller
             return CreatedAtAction(nameof(GetAppointment), new { id = appointment.Id }, ToDto(appointment));
         }
 
+        /// <summary>
+        /// Updates an existing appointment.
+        /// </summary>
+        /// <param name="id">ID of the appointment to update.</param>
+        /// <param name="dto">Updated appointment data.</param>
+        /// <returns>No content on success; NotFound if not found.</returns>
         [HttpPut("{id}")]
         public IActionResult UpdateAppointment(int id, [FromBody] AppointmentDto dto)
         {
@@ -60,6 +80,11 @@ namespace MotoCareAPI.Controller
             return NoContent();
         }
 
+        /// <summary>
+        /// Deletes an appointment by ID.
+        /// </summary>
+        /// <param name="id">The appointment ID to delete.</param>
+        /// <returns>No content on success; NotFound if not found.</returns>
         [HttpDelete("{id}")]
         public IActionResult DeleteAppointment(int id)
         {

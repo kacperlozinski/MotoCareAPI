@@ -12,12 +12,21 @@ namespace MotoCareAPI.Controller
     {
         private static readonly List<ServiceCategory> _categories = new();
 
+        /// <summary>
+        /// Retrieves all service categories.
+        /// </summary>
+        /// <returns>List of all service categories.</returns>
         [HttpGet]
         public ActionResult<IEnumerable<ServiceCategoryDto>> GetServiceCategories()
         {
             return Ok(_categories.Select(ToDto));
         }
 
+        /// <summary>
+        /// Retrieves a specific service category by ID.
+        /// </summary>
+        /// <param name="id">The ID of the service category.</param>
+        /// <returns>The service category if found; otherwise NotFound.</returns>
         [HttpGet("{id}")]
         public ActionResult<ServiceCategoryDto> GetServiceCategory(int id)
         {
@@ -29,6 +38,11 @@ namespace MotoCareAPI.Controller
             return Ok(ToDto(category));
         }
 
+        /// <summary>
+        /// Creates a new service category.
+        /// </summary>
+        /// <param name="categoryDto">The service category data to create.</param>
+        /// <returns>The created service category.</returns>
         [HttpPost]
         public ActionResult<ServiceCategoryDto> CreateServiceCategory([FromBody] ServiceCategoryDto categoryDto)
         {
@@ -39,6 +53,12 @@ namespace MotoCareAPI.Controller
             return CreatedAtAction(nameof(GetServiceCategory), new { id = category.Id }, createdDto);
         }
 
+        /// <summary>
+        /// Updates an existing service category.
+        /// </summary>
+        /// <param name="id">The ID of the service category to update.</param>
+        /// <param name="categoryDto">The updated service category data.</param>
+        /// <returns>NoContent on success; NotFound if not found.</returns>
         [HttpPut("{id}")]
         public IActionResult UpdateServiceCategory(int id, [FromBody] ServiceCategoryDto categoryDto)
         {
@@ -56,6 +76,11 @@ namespace MotoCareAPI.Controller
             return NoContent();
         }
 
+        /// <summary>
+        /// Deletes a service category by ID.
+        /// </summary>
+        /// <param name="id">The ID of the service category to delete.</param>
+        /// <returns>NoContent if deleted; NotFound if not found.</returns>
         [HttpDelete("{id}")]
         public IActionResult DeleteServiceCategory(int id)
         {
