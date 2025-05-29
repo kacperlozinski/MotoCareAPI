@@ -9,9 +9,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="14.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.5" />
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="8.1.1" />
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="8.1.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MotoCareAPI.Application\MotoCareAPI.Services.csproj" />
+    <ProjectReference Include="..\MotoCareAPI.Domain\MotoCareAPI.Domain.csproj" />
+    <ProjectReference Include="..\MotoCareAPI.Infrastructure\MotoCareAPI.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

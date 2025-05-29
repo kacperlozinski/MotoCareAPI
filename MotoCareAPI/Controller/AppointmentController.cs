@@ -3,6 +3,8 @@ using MotoCareAPI.Entities;
 using MotoCareAPI.MotoCareDTO;
 using System.Collections.Generic;
 using System.Linq;
+using MotoCareAPI.Infrastructure.Repositories;
+using MotoCareAPI.Infrastructure.Interfaces;
 
 namespace MotoCareAPI.Controller
 {
@@ -10,18 +12,25 @@ namespace MotoCareAPI.Controller
     [Route("api/[controller]")]
     public class AppointmentController : ControllerBase
     {
-        private static List<Appointment> _appointments = new List<Appointment>();
+        public AppointmentController(IAppointmentRepository appointmentRepository)
+        {
+            _appointmentRepository = appointmentRepository; 
+        }
+        private readonly IAppointmentRepository _appointmentRepository;
 
         /// <summary>
         /// Retrieves all appointments.
         /// </summary>
         /// <returns>List of appointments.</returns>
         [HttpGet]
-        public ActionResult<IEnumerable<AppointmentDto>> GetAppointments()
+        public async Task<ActionResult<IEnumerable<AppointmentDto>>> GetAppointments()
         {
-            var dtos = _appointments.Select(ToDto).ToList();
+            var appointments = await _appointmentRepository.GetAllAppointmentsAsync();
+            
 
-            return Ok(dtos);
+            return Ok(appointments);
+
+            
         }
 
         /// <summary>
@@ -32,12 +41,12 @@ namespace MotoCareAPI.Controller
         [HttpGet("{id}")]
         public ActionResult<AppointmentDto> GetAppointment(int id)
         {
-            var appointment = _appointments.FirstOrDefault(a => a.Id == id);
+            var appointment = _appointmentRepository.GetAppointmentByIdAsync(id);
 
             if (appointment == null)
                 return NotFound();
 
-            return Ok(ToDto(appointment));
+            return Ok(appointment);
         }
 
         /// <summary>
@@ -48,9 +57,10 @@ namespace MotoCareAPI.Controller
         [HttpPost]
         public ActionResult<AppointmentDto> CreateAppointment([FromBody] AppointmentDto dto)
         {
+            
             var appointment = ToEntity(dto);
-            appointment.Id = _appointments.Any() ? _appointments.Max(s => s.Id) + 1 : 1;
-            _appointments.Add(appointment);
+           
+            _appointmentRepository.CreateAppointmentAsync(appointment);
 
             return CreatedAtAction(nameof(GetAppointment), new { id = appointment.Id }, ToDto(appointment));
         }
@@ -63,21 +73,18 @@ namespace MotoCareAPI.Controller
         /// <returns>No content on success; NotFound if not found.</returns>
         [HttpPut("{id}")]
         public IActionResult UpdateAppointment(int id, [FromBody] AppointmentDto dto)
-        {
-            var index = _appointments.FirstOrDefault(a => a.Id == id);
+        {/*
+            var index = _appointmentRepository.FirstOrDefault(a => a.Id == id);
 
             if (index is null)
-                return NotFound();
+                return NotFound();*/
 
             var updated = ToEntity(dto);
             updated.Id = id;
 
-            var i = _appointments.FindIndex(a => a.Id == id);
+            
 
-            if (i >= 0)
-                _appointments[i] = updated;
-
-            return NoContent();
+            return Ok();
         }
 
         /// <summary>
@@ -88,14 +95,12 @@ namespace MotoCareAPI.Controller
         [HttpDelete("{id}")]
         public IActionResult DeleteAppointment(int id)
         {
-            var appointment = _appointments.FirstOrDefault(a => a.Id == id);
+           
 
-            if (appointment == null)
-                return NotFound();
 
-            _appointments.Remove(appointment);
+            _appointmentRepository.DeleteAppointmentAsync(id);
 
-            return NoContent();
+            return Ok();
         }
 
         private static AppointmentDto ToDto(Appointment appointment)

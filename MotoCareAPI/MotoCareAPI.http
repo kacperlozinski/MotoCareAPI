@@ -1,6 +1,6 @@
 @MotoCareAPI_HostAddress = http://localhost:5048
 
-GET {{MotoCareAPI_HostAddress}}/api/Appointment/
+GET {{MotoCareAPI_HostAddress}}/swagger/index.html/
 Accept: application/json
 
 ###

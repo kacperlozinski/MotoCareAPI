@@ -1,6 +1,8 @@
 using MotoCareAPI.Entities;
 using System.Reflection;
 using System.Text.Json.Serialization;
+using MotoCareAPI.Infrastructure.Interfaces;
+using MotoCareAPI.Infrastructure.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +14,8 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
         
     });
+builder.Services.AddScoped<IAppointmentRepository,AppointmentRepository>();
+
 
 
 builder.Services.AddEndpointsApiExplorer();
